@@ -1,12 +1,40 @@
 allow_embedding: false
+db_schema:
+  files:
+    client: none
+    columns:
+    - admin_ui: {order: 0, width: 200}
+      client_hidden: false
+      name: path
+      type: string
+    - admin_ui: {order: 1, width: 200}
+      client_hidden: false
+      name: file
+      type: media
+    - admin_ui: {order: 2, width: 200}
+      client_hidden: false
+      name: file_version
+      type: string
+    indexes: []
+    server: full
+    title: Files
 dependencies: []
-name: M3 App 5
-package_name: M3_App_5
+name: reise
+package_name: reise
 renamed: true
 runtime_options:
   client_version: '3'
   legacy_features: {bootstrap3: true, class_names: true}
   server_spec: {base: python310-minimal}
   version: 3
-services: []
+services:
+- client_config: {enable_v2: true}
+  server_config: {}
+  source: /runtime/services/tables.yml
+- client_config: {}
+  server_config: {}
+  source: /runtime/services/anvil/secrets.yml
+- client_config: {}
+  server_config: {file_table: files}
+  source: /runtime/services/anvil/files.yml
 startup_form: Form1
