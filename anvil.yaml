@@ -25,7 +25,7 @@ renamed: true
 runtime_options:
   client_version: '3'
   legacy_features: {bootstrap3: true, class_names: true}
-  server_spec: {base: python310-minimal}
+  server_spec: {base: python310-datascience}
   version: 3
 services:
 - client_config: {enable_v2: true}
