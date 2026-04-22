@@ -39,6 +39,13 @@ runtime_options:
   legacy_features: {bootstrap3: true, class_names: true}
   server_spec: {base: python310-datascience}
   version: 3
+secrets:
+  ANTHROPIC_API_KEY:
+    type: secret
+    value: {5B3JSYBIRSO35XSL: xfbHrBZ/qf4MM5mOlmyDhV3NJyUAQYrWG0pIrzXgCZB4Hld3tsc9ALvvoNBcPCqg96Gr225NBARyLE4ePiw8/M077HYo4jTIKHO1FcnPItrdT6MCjezqyFA5TvMXjYtmo7WTXX8gUWjb0QhhDVEMHe74V7DYcG0aqdJGaVgDE/fmx5w03b5yN70ciXeZPHuUNtWMLFq0n+ZqrarRKsl4tza+JK1dYUDrjJVyqWLfr+3vhsZCDWPNQ35FP6b32aIaF/bkzoOrXDT2oDk=}
+  new_secret:
+    type: secret
+    value: {5B3JSYBIRSO35XSL: ''}
 services:
 - client_config: {enable_v2: true}
   server_config: {}
