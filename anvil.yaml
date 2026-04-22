@@ -43,9 +43,12 @@ secrets:
   ANTHROPIC_API_KEY:
     type: secret
     value: {5B3JSYBIRSO35XSL: xfbHrBZ/qf4MM5mOlmyDhV3NJyUAQYrWG0pIrzXgCZB4Hld3tsc9ALvvoNBcPCqg96Gr225NBARyLE4ePiw8/M077HYo4jTIKHO1FcnPItrdT6MCjezqyFA5TvMXjYtmo7WTXX8gUWjb0QhhDVEMHe74V7DYcG0aqdJGaVgDE/fmx5w03b5yN70ciXeZPHuUNtWMLFq0n+ZqrarRKsl4tza+JK1dYUDrjJVyqWLfr+3vhsZCDWPNQ35FP6b32aIaF/bkzoOrXDT2oDk=}
-  new_secret:
+  API_KEY_ALIASES:
     type: secret
-    value: {5B3JSYBIRSO35XSL: ''}
+    value: {5B3JSYBIRSO35XSL: VQaD+QD9hGIvFxbvA4CUZKxu77CTjBJ3Kd38JAV0XQGnAn3l4ql4VYomEugB1tX94FNdyPlEPQ0cAvX/tpDjAMNOblKecyHXRItDmrycixdCFcdTkyx+o8JtPKs0erU9SXWm}
+  API_KEY_HANS:
+    type: secret
+    value: {5B3JSYBIRSO35XSL: 2Z6iqMqPZ2VtRPWppLpWLTk3YcKzx62cBK3/eB00zawfqD64MbRWICPC5khVjkeE6mdcACGCWjtmfOVkJzNkqij/SCGDIeU33nzHepKnKlhAHwWFJgBQ4k+07svwVupO0J8TSGSrPndl5/wPx4aZ8v9Zrqk=}
 services:
 - client_config: {enable_v2: true}
   server_config: {}
