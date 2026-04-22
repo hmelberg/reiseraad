@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reiseråd — testversjon</title>
+<style>
+  :root {
+    --bg: #f5f7fa;
+    --card: #ffffff;
+    --ink: #1a1d24;
+    --ink-dim: #5b616b;
+    --line: #e0e3e8;
+    --accent: #0a6cff;
+    --warn-bg: #7a4b00;
+    --warn-ink: #ffe8b8;
+    --outbreak: #b54708;
+    --outbreak-bg: #fff4e5;
+    --ok: #1a7f37;
+    --ok-bg: #e8f5ee;
+    --user-bubble: #e8f0ff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    line-height: 1.5; }
+  body { display: flex; flex-direction: column; min-height: 100vh; }
+
+  .warning {
+    background: var(--warn-bg);
+    color: var(--warn-ink);
+    padding: 18px 20px;
+    text-align: center;
+    border-bottom: 4px solid #5c3800;
+  }
+  .warning .big {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 6px;
+  }
+  .warning .small {
+    font-size: 14px;
+    opacity: 0.95;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  header.title {
+    background: var(--card);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+  }
+  header.title h1 {
+    font-size: 18px; font-weight: 700; margin: 0; color: var(--ink);
+  }
+  header.title .sub {
+    color: var(--ink-dim); font-size: 13px;
+  }
+  header.title button.settings-btn {
+    background: transparent; border: 1px solid var(--line);
+    padding: 6px 12px; font-size: 13px; color: var(--ink-dim); cursor: pointer;
+    border-radius: 6px;
+  }
+  header.title button.settings-btn:hover { background: var(--bg); }
+
+  .settings-panel {
+    display: none;
+    background: #fffbea;
+    border-bottom: 1px solid #eadba0;
+    padding: 14px 20px;
+  }
+  .settings-panel.open { display: block; }
+  .settings-panel label { font-size: 13px; color: var(--ink-dim); display: block; margin-bottom: 4px; margin-top: 6px; }
+  .settings-panel input, .settings-panel select {
+    width: 100%; max-width: 480px;
+    padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px;
+  }
+
+  main.chat {
+    flex: 1;
+    max-width: 820px; width: 100%;
+    margin: 0 auto;
+    padding: 24px 20px 180px 20px;
+  }
+  .msg { margin: 18px 0; }
+  .msg.user .bubble {
+    background: var(--user-bubble);
+    display: inline-block;
+    padding: 10px 14px;
+    border-radius: 14px 14px 4px 14px;
+    max-width: 90%;
+  }
+  .msg.user { text-align: right; }
+  .msg.assistant .bubble {
+    background: var(--card);
+    border: 1px solid var(--line);
+    padding: 14px 16px;
+    border-radius: 14px 14px 14px 4px;
+    max-width: 100%;
+  }
+  .msg .answer-text {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  .meta {
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    margin-top: 8px; font-size: 12px; color: var(--ink-dim);
+  }
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .badge.outbreak { background: var(--outbreak-bg); color: var(--outbreak); }
+  .badge.direct   { background: var(--ok-bg); color: var(--ok); }
+  .badge.partial  { background: #fff4e5; color: #b54708; }
+
+  .sources { margin-top: 14px; border-top: 1px dashed var(--line); padding-top: 12px; }
+  .sources h4 { margin: 0 0 8px 0; font-size: 12px; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--ink-dim); font-weight: 600; }
+  .sources ol { margin: 0; padding-left: 20px; }
+  .sources li { margin: 4px 0; font-size: 14px; }
+  .sources a { color: var(--accent); text-decoration: none; }
+  .sources a:hover { text-decoration: underline; }
+  .sources .tag { font-size: 11px; color: var(--ink-dim); margin-left: 6px;
+    padding: 1px 6px; background: var(--bg); border-radius: 6px; }
+  .sources .tag.outbreak { background: var(--outbreak-bg); color: var(--outbreak); }
+  .sources .tag.theme    { background: #eef4ff; color: #1e40af; }
+  .sources .tag.country  { background: #eef8f1; color: var(--ok); }
+  .sources .note { color: var(--ink-dim); font-size: 12px; font-style: italic; margin-left: 4px; }
+  .sources .cited { font-weight: 600; }
+  .sources .updated { color: var(--ink-dim); font-size: 11px; margin-left: 4px; }
+
+  .spinner {
+    display: inline-block; width: 14px; height: 14px;
+    border: 2px solid #ddd; border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-state {
+    text-align: center; color: var(--ink-dim); padding: 32px 20px;
+  }
+  .empty-state .ex {
+    display: inline-block;
+    margin: 6px 4px;
+    padding: 8px 12px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .empty-state .ex:hover { background: var(--bg); }
+
+  .composer {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--card);
+    border-top: 1px solid var(--line);
+    padding: 12px 20px;
+  }
+  .composer-inner {
+    max-width: 820px; margin: 0 auto;
+    display: flex; gap: 8px; align-items: flex-end;
+  }
+  .composer textarea {
+    flex: 1;
+    resize: none;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    font: inherit; font-size: 15px;
+    min-height: 44px; max-height: 160px;
+    background: var(--bg);
+    outline: none;
+  }
+  .composer textarea:focus { border-color: var(--accent); background: var(--card); }
+  .composer button.send {
+    padding: 10px 18px; font-size: 15px;
+    background: var(--accent); color: white; border: none; border-radius: 10px;
+    cursor: pointer; font-weight: 600;
+  }
+  .composer button.send:disabled { background: #a8b8d8; cursor: not-allowed; }
+  .composer .footer-note {
+    text-align: center; font-size: 11px; color: var(--ink-dim);
+    margin-top: 6px;
+  }
+
+  .error {
+    background: #ffe3e3; color: #b30000;
+    padding: 10px 14px; border-radius: 8px; font-size: 14px;
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="warning" role="alert" aria-live="polite">
+  <span class="big">⚠ Testversjon — IKKE offisiell informasjon. Skal IKKE brukes som endelig reiseråd.</span>
+  <span class="small">
+    Dette er et eksperimentelt verktøy laget for teknisk testing. Innholdet er basert på en automatisk
+    henting av artikler fra fhi.no og et språkmodell-svar. Det er <strong>ikke</strong> offisiell informasjon
+    fra Folkehelseinstituttet, og innholdet kan være utdatert — særlig for utbrudd som endres raskt.
+    Rådfør deg alltid med fastlege eller en vaksinasjonsklinikk før du reiser, og sjekk
+    <a href="https://www.fhi.no/sm/smittevernrad-ved-reiser/reiserad/" target="_blank" rel="noopener noreferrer" style="color: var(--warn-ink); text-decoration: underline;">fhi.no/reiserad</a>
+    for oppdatert informasjon.
+  </span>
+</div>
+
+<header class="title">
+  <div>
+    <h1>Spør om reiseråd og vaksiner</h1>
+    <span class="sub">Testversjon · basert på artikler fra fhi.no</span>
+  </div>
+  <button class="settings-btn" id="settingsBtn" type="button">Innstillinger</button>
+</header>
+
+<div class="settings-panel" id="settingsPanel">
+  <label for="apiKey">API-nøkkel</label>
+  <input id="apiKey" type="text" autocomplete="off" spellcheck="false"
+         placeholder="din-nøkkel-her">
+  <label for="apiUrl">API-URL</label>
+  <input id="apiUrl" type="text" autocomplete="off" spellcheck="false">
+  <label for="regionSel">Region-filter (valgfritt)</label>
+  <select id="regionSel">
+    <option value="">(ingen filter)</option>
+    <option value="afrika">Afrika</option>
+    <option value="asia">Asia</option>
+    <option value="europa">Europa</option>
+    <option value="nord-og-mellom-amerika">Nord- og Mellom-Amerika</option>
+    <option value="oseania">Oseania</option>
+    <option value="sor-amerika">Sør-Amerika</option>
+    <option value="tema">Tema</option>
+    <option value="utbrudd">Utbrudd</option>
+  </select>
+</div>
+
+<main class="chat" id="chat">
+  <div class="empty-state" id="emptyState">
+    <p>Still et spørsmål nedenfor. Eksempler:</p>
+    <div>
+      <button class="ex" type="button" data-q="Hvilke vaksiner trenger jeg til Thailand?">Hvilke vaksiner trenger jeg til Thailand?</button>
+      <button class="ex" type="button" data-q="Er det malaria i India?">Er det malaria i India?</button>
+      <button class="ex" type="button" data-q="Må jeg ta gulfebervaksine før jeg reiser til Brasil?">Må jeg ta gulfebervaksine før jeg reiser til Brasil?</button>
+      <button class="ex" type="button" data-q="Kan jeg reise til Mexico når jeg er gravid?">Kan jeg reise til Mexico når jeg er gravid?</button>
+      <button class="ex" type="button" data-q="Trenger jeg rabiesvaksine til Vietnam?">Trenger jeg rabiesvaksine til Vietnam?</button>
+      <button class="ex" type="button" data-q="Aktuelle utbrudd akkurat nå?">Aktuelle utbrudd akkurat nå?</button>
+    </div>
+  </div>
+</main>
+
+<div class="composer">
+  <div class="composer-inner">
+    <textarea id="q" placeholder="Still et spørsmål om reisevaksiner eller smittevern ..." rows="1"></textarea>
+    <button class="send" id="sendBtn" type="button">Spør</button>
+  </div>
+  <div class="footer-note">
+    Trykk <kbd>Enter</kbd> for å sende · <kbd>Shift+Enter</kbd> for ny linje
+  </div>
+</div>
+
+<script>
+// ----- config -----
+const DEFAULT_API_URL = "https://reiseraad.anvil.app/_/api/ask";
+const LS_KEY = "reise_api_key_v1";
+const LS_URL = "reise_api_url_v1";
+const LS_REG = "reise_region_v1";
+
+const $ = (sel) => document.querySelector(sel);
+const chat = $("#chat");
+const emptyState = $("#emptyState");
+const q = $("#q");
+const sendBtn = $("#sendBtn");
+const settingsBtn = $("#settingsBtn");
+const settingsPanel = $("#settingsPanel");
+const apiKeyInp = $("#apiKey");
+const apiUrlInp = $("#apiUrl");
+const regionSel = $("#regionSel");
+
+apiKeyInp.value = localStorage.getItem(LS_KEY) || "";
+apiUrlInp.value = localStorage.getItem(LS_URL) || DEFAULT_API_URL;
+regionSel.value = localStorage.getItem(LS_REG) || "";
+
+settingsBtn.addEventListener("click", () => settingsPanel.classList.toggle("open"));
+apiKeyInp.addEventListener("change", () => localStorage.setItem(LS_KEY, apiKeyInp.value.trim()));
+apiUrlInp.addEventListener("change", () => localStorage.setItem(LS_URL, apiUrlInp.value.trim() || DEFAULT_API_URL));
+regionSel.addEventListener("change", () => localStorage.setItem(LS_REG, regionSel.value));
+
+document.querySelectorAll(".empty-state .ex").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    q.value = btn.dataset.q;
+    q.focus();
+  });
+});
+
+q.addEventListener("input", () => {
+  q.style.height = "auto";
+  q.style.height = Math.min(q.scrollHeight, 160) + "px";
+});
+
+q.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    ask();
+  }
+});
+sendBtn.addEventListener("click", ask);
+
+// ----- rendering -----
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function renderUser(text) {
+  const el = document.createElement("div");
+  el.className = "msg user";
+  el.innerHTML = `<div class="bubble">${escapeHtml(text)}</div>`;
+  chat.appendChild(el);
+  return el;
+}
+
+function renderLoading() {
+  const el = document.createElement("div");
+  el.className = "msg assistant";
+  el.innerHTML = `<div class="bubble"><span class="spinner"></span> <span style="color:var(--ink-dim)">Henter svar ...</span></div>`;
+  chat.appendChild(el);
+  return el;
+}
+
+function renderError(msg) {
+  const el = document.createElement("div");
+  el.className = "msg assistant";
+  el.innerHTML = `<div class="bubble"><div class="error">${escapeHtml(msg)}</div></div>`;
+  chat.appendChild(el);
+  return el;
+}
+
+function linksList(related, citations) {
+  const citedIds = new Set((citations || []).map((c) => c.id));
+  const noteById = {};
+  (citations || []).forEach((c) => { if (c.note) noteById[c.id] = c.note; });
+
+  if (!related || related.length === 0) return "";
+  const items = related.map((r) => {
+    const cited = citedIds.has(r.id);
+    const note = noteById[r.id];
+    const kindClass = r.kind || "country";
+    const kindLabel = r.kind === "outbreak" ? "utbrudd"
+                    : r.kind === "theme"   ? "tema"
+                    : r.country             ? r.country
+                    : (r.category_label || "");
+    return `
+      <li>
+        <a href="${escapeHtml(r.url)}" target="_blank" rel="noopener noreferrer" class="${cited ? "cited" : ""}">
+          ${escapeHtml(r.title)}
+        </a>
+        <span class="tag ${escapeHtml(kindClass)}">${escapeHtml(kindLabel)}</span>
+        ${r.last_updated ? `<span class="updated">sist oppdatert ${escapeHtml(r.last_updated)}</span>` : ""}
+        ${note ? `<span class="note">– ${escapeHtml(note)}</span>` : ""}
+      </li>`;
+  }).join("");
+  return `
+    <div class="sources">
+      <h4>Relaterte artikler fra fhi.no (de uthevede er brukt som kilder i svaret)</h4>
+      <ol>${items}</ol>
+    </div>`;
+}
+
+function renderAnswer(data) {
+  const el = document.createElement("div");
+  el.className = "msg assistant";
+  const badges = [];
+  if (data.mentions_outbreak) badges.push(`<span class="badge outbreak">Utbrudd nevnt</span>`);
+  if (data.has_direct_coverage) badges.push(`<span class="badge direct">Direkte dekning</span>`);
+  else if (data.citations && data.citations.length > 0) badges.push(`<span class="badge partial">Delvis dekning</span>`);
+  const latency = data.latency_ms ? `${(data.latency_ms / 1000).toFixed(1)} s` : "";
+  const model = data.model ? ` · ${escapeHtml(data.model)}` : "";
+  el.innerHTML = `
+    <div class="bubble">
+      <div class="answer-text">${escapeHtml(data.answer || "")}</div>
+      <div class="meta">
+        ${badges.join(" ")}
+        <span>${latency}${model}</span>
+      </div>
+      ${linksList(data.related_links, data.citations)}
+    </div>`;
+  chat.appendChild(el);
+  return el;
+}
+
+// ----- API call -----
+async function ask() {
+  const question = q.value.trim();
+  if (!question) return;
+  const apiKey = apiKeyInp.value.trim();
+  const apiUrl = apiUrlInp.value.trim() || DEFAULT_API_URL;
+  const region = regionSel.value.trim();
+  if (!apiKey) {
+    settingsPanel.classList.add("open");
+    apiKeyInp.focus();
+    return;
+  }
+
+  if (emptyState) { emptyState.style.display = "none"; }
+  q.value = "";
+  q.style.height = "auto";
+  sendBtn.disabled = true;
+
+  renderUser(question);
+  const loadingEl = renderLoading();
+  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+
+  const payload = { question };
+  if (region) payload.category = region;
+
+  try {
+    const resp = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        "X-API-Key": apiKey,
+      },
+      body: JSON.stringify(payload),
+    });
+    const text = await resp.text();
+    loadingEl.remove();
+    if (!resp.ok) {
+      let msg = `Feil (HTTP ${resp.status})`;
+      try { msg += ": " + (JSON.parse(text).error || text); } catch { msg += ": " + text; }
+      renderError(msg);
+    } else {
+      const data = JSON.parse(text);
+      renderAnswer(data);
+    }
+  } catch (err) {
+    loadingEl.remove();
+    renderError("Nettverksfeil: " + (err && err.message ? err.message : err));
+  } finally {
+    sendBtn.disabled = false;
+    q.focus();
+    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+  }
+}
+</script>
+</body>
+</html>
