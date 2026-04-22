@@ -1,5 +1,17 @@
 allow_embedding: false
 db_schema:
+  api_usage:
+    client: none
+    columns: []
+    indexes: []
+    server: full
+    title: api_usage
+  eval_runs:
+    client: none
+    columns: []
+    indexes: []
+    server: full
+    title: eval_runs
   files:
     client: none
     columns:
